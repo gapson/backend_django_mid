@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
 
-
+# class UserProfile(AbstractBaseUser, PermissionsMixin):
 class UserProfile(models.Model):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255, unique=True)
@@ -30,4 +30,5 @@ class UserProfile(models.Model):
         return self.email
 
     def is_authenticated1(self):
+        # django won't allow having the is_authenticated method when we Set this model as the default user
         return False
