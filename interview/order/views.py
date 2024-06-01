@@ -23,6 +23,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         except Exception:  # could catch the pydantic.errors.DateError only
             return None
         return date
+    
     def get(self, request: Request, *args, **kwargs) -> Response:
         orders = self.get_queryset()
         date_start_str = request.query_params.get('date-start', None)
