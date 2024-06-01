@@ -1,6 +1,8 @@
+from pydantic.datetime_parse import parse_date
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
+from rest_framework import status
 
 from interview.inventory.models import Inventory, InventoryLanguage, InventoryTag, InventoryType
 from interview.inventory.schemas import InventoryMetaData
@@ -27,8 +29,19 @@ class InventoryListCreateView(APIView):
         return Response(serializer.data, status=201)
     
     def get(self, request: Request, *args, **kwargs) -> Response:
-        serializer = self.serializer_class(self.get_queryset(), many=True)
-        
+        inventories = self.get_queryset()
+        date_str = request.query_params.get('date', None)
+        if date_str:
+            error_msg = {'error': 'Invalid date format. Use YYYY-MM-DD.'}
+            try:
+                date = parse_date(date_str)
+                if date:
+                    inventories = inventories.filter(created_at__gt=date)
+                else:
+                    return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
+            except Exception:  # could catch the pydantic.errors.DateError only
+                return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(inventories, many=True)
         return Response(serializer.data, status=200)
     
     def get_queryset(self):
